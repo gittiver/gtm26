@@ -1,0 +1,3 @@
+[submodule "website/themes/austere"]
+	path = website/themes/austere
+	url = https://github.com/tomwrw/austere-theme-zola
