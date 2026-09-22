@@ -5,19 +5,15 @@ template = "index.html"
 
 # Gutes Tun Münster
 
-Deine gute Tat. Für dich und Münster.
+Deine gute Tat. Für dich und für andere. Mach deine Stadt zu einem besseren Ort.
 
-Eine App/Webanwendung, die Menschen motiviert, gute Taten zu sammeln, 
-selbst aktiv zu werden und andere zu inspirieren.
+Eine App/Webanwendung, die Menschen motiviert, gute Taten zu sammeln, aktiv zu werden und andere zu inspirieren. 
 
-Für sich. Für andere. Für die Nachbarschaft. Für Münster.
-
-Wir wollen Solidarität und Selbstwirksamkeit stärken, 
-Menschen digital und analog verbinden und 
-ein Gegengewicht zu schlechten Nachrichten, 
-Frustration und dem Gefühl von Ohnmacht schaffen.
+Wir wollen Solidarität und Selbstwirksamkeit stärken und Menschen digital und analog in Verbindung bringen. Und damit ein Gegengewicht schaffen zu dem Gefühl von Ohnmacht und Hilflosigkeit angesichts zunehmender Nachrichten über Krisen und Konflikte in der Welt.
 
 Viele kleine gute Taten können einen großen Unterschied machen. Wir wollen das sichtbar machen.
 
-Dafür suchen wir euch, die Lust haben, diese Idee mit uns weiterzuentwickeln – 
+Dafür suchen wir euch, die Lust haben, diese Idee mit uns weiterzuentwickeln –
 egal, ob technisch, kreativ oder einfach mit guten Ideen.
+
+>Sei du selbst die Veränderung, die du dir wünschst für diese Welt. *(Mahatma Gandhi zugeschrieben)*
