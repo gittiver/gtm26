@@ -9,4 +9,4 @@ Fünf Minuten Meditation
 
 <!-- more -->
 
-hier könnte man weiter beschreiben und links, bilder etc einfügen
+5 Minuten achtsam nichts tun
