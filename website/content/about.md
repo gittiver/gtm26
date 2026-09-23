@@ -3,6 +3,8 @@ title = "Wer wir sind"
 template = "page.html"
 +++
 
+![Logo Banner](/gtm_head_banner.png)
+
 Frank Landgraf, [www.softwareschmied.net](https://www.softwareschmied.net) 
 
 Viola Kowal, Sozialarbeiterin, Systemische Therapeutin, <br /> 

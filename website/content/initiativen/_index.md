@@ -1,5 +1,5 @@
 +++
-title = "Vorschläge für gute Taten"
+title = "Gemeinsam Gutes tun - Initiativen"
 sort_by = "date"
 template = "items.html"
 page_template = "item.html"

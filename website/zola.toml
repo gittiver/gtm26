@@ -5,7 +5,7 @@ base_url = "https://gtm26.de"
 compile_sass =	false #true
 
 # Whether to build a search index to be used later on by a JavaScript library
-build_search_index = false
+build_search_index = true
 
 # Default site language.
 default_language = "de"
@@ -33,7 +33,7 @@ anchors = "on"
 # Keywords for SEO.
 keywords = "Gutes, Tun, Münster, Hack, mshack"
 # Site icon in header (optional - comment out to hide).
-#site_icon = "quill.svg"
+#site_icon = "gtm_head_banner.png"
 # Header strapline (optional - comment out to hide).
 strapline = "Gutes Tun Münster. Deine gute Tat. Für dich und Münster."
 # Footer text (optional - comment out to hide).
@@ -41,7 +41,7 @@ strapline = "Gutes Tun Münster. Deine gute Tat. Für dich und Münster."
 # Favicon (optional - comment out to hide).
 favicon = "/favicon.ico"
 # Profile picture on home page (optional - comment out to hide).
-#profile_picture = "/images/profile.svg"
+#profile_picture = #"/images/profile.svg"
 
 # Enable inline SVG icons (uses sprite sheet).
 inline_icons = true
@@ -59,9 +59,10 @@ menu_links = [
   { url = "$BASE_URL/", name = "Home" },
 #  { url = "$BASE_URL/posts/", name = "Posts" },
   { url = "$BASE_URL/proposals/", name = "Was kann ich tun?" },
+  { url = "$BASE_URL/initiativen/", name = "Initiativen" },
   { url = "$BASE_URL/about/", name = "About" },
-#  { url = "$BASE_URL/projects/", name = "Projects" },
 #  { url = "$BASE_URL/tags/", name = "Tags" },
+#  { url = "$BASE_URL/projects/", name = "Projects" },
 #  { url = "$BASE_URL/search/", name = "Search" },
 ]
 

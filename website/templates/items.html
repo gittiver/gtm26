@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>{{ section.title }}</h1>
+
+<h2>Gruppiert</h2>
+<a href='{{ config.base_url | safe }}/tags/'>nach Schlagworten</a>
+
+<h2>Alle</h2>
+{{ section.content | safe }}
+<ul class="p">
+  {% for item in section.pages %}
+  <li>
+    <a href="{{ item.permalink | safe }}">{{ item.title }}</a>{% if item.draft %} <span class="s">(Draft)</span>{% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% endblock content %}
