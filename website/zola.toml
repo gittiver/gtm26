@@ -14,7 +14,10 @@ generate_feeds = false # true
 # Specify feed filenames.
 feed_filenames = ["atom.xml", "rss.xml"]
 # Taxonomies.
-taxonomies = [{ name = "tags", feed = true }]
+taxonomies = [
+	   { name = "tags", feed = true },
+           { name = "organisation", feed = true }
+]
 theme = "austere"
 
 [search]
@@ -39,7 +42,7 @@ strapline = "Gutes Tun Münster. Deine gute Tat. Für dich und Münster."
 # Footer text (optional - comment out to hide).
 #footer_text = "austere - made for <a href='https://getzola.org'>Zola</a>"
 # Favicon (optional - comment out to hide).
-favicon = "/favicon.ico"
+#favicon = "/favicon.ico"
 # Profile picture on home page (optional - comment out to hide).
 #profile_picture = #"/images/profile.svg"
 
