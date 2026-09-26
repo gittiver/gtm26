@@ -36,6 +36,8 @@ def create_app(settings: Settings):
     #"http://localhost.tiangolo.com",
     #"https://localhost.tiangolo.com",
     #"http://localhost",
+        "http://127.0.0.1:1111",
+        "http://127.0.0.1:8080",
         "http://localhost:8080",
         "http://localhost:1111",
 
@@ -44,7 +46,7 @@ def create_app(settings: Settings):
     app.add_middleware(
         CORSMiddleware,
         allow_origins=origins,
-        allow_credentials=False,# True,
+        allow_credentials= False,
         allow_methods=["*"],
         allow_headers=["*"],
     )

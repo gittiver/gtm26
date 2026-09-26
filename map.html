@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Münster - Karte der guten Taten</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; }
+
+  #sidebar {
+    width: 360px; background: #1a5c38; color: white;
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  #sidebar h1 { padding: 16px; font-size: 1.2rem; background: #134528; }
+  #mode-buttons { display: flex; padding: 10px; gap: 8px; }
+  #mode-buttons button {
+    flex: 1; padding: 10px; border: none; border-radius: 8px;
+    cursor: pointer; font-weight: 600; background: #2d7a4d; color: white;
+    transition: background 0.2s;
+  }
+  #mode-buttons button.active { background: #fff; color: #1a5c38; }
+
+  #form, #list-container { flex: 1; overflow-y: auto; padding: 12px; display: none; }
+  #form.active, #list-container.active { display: block; }
+
+  input, textarea {
+    width: 100%; padding: 10px; margin-bottom: 10px;
+    border: none; border-radius: 8px; font-size: 14px; font-family: inherit;
+  }
+  textarea { height: 90px; resize: vertical; }
+  select { width: 100%; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: none; }
+
+  .submit-btn {
+    width: 100%; padding: 12px; background: #f4a340; color: #1a5c38;
+    border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer;
+  }
+  .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .deed-card {
+    background: white; color: #333; border-radius: 10px;
+    padding: 12px; margin-bottom: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  }
+  .deed-card .title { font-weight: 600; margin-bottom: 4px; display: flex; justify-content: space-between; }
+  .deed-card .cat { font-size: 12px; color: #1a5c38; background: #e3f2ea; padding: 2px 8px; border-radius: 10px; }
+  .deed-card .desc { font-size: 14px; margin: 6px 0; }
+  .deed-card .footer { display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #777; }
+
+  .thumbs {
+    background: #e3f2ea; border: none; border-radius: 15px;
+    padding: 4px 12px; cursor: pointer; font-size: 14px; font-weight: 600; color: #1a5c38;
+  }
+  .thumbs:hover { background: #c9e8d8; }
+  .thumbs.voted { background: #1a5c38; color: white; }
+
+  #map { flex: 1; }
+  .marker-icon {
+    background: #f4a340; width: 34px; height: 34px; border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg); border: 2px solid white;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4);
+  }
+  .marker-icon span { transform: rotate(45deg); font-size: 16px; }
+
+  @media (max-width: 700px) {
+    body { flex-direction: column; }
+    #sidebar { width: 100%; height: 45%; }
+    #map { height: 55%; }
+  }
+</style>
+</head>
+<body>
+
+<div id="sidebar">
+  <h1>🤝 Münster – Karte der guten Taten</h1>
+  <div id="mode-buttons">
+    <button id="btn-list" class="active" onclick="switchMode('list')">📜 Taten ansehen</button>
+    <button id="btn-add" onclick="switchMode('add')">➕ Tat eintragen</button>
+  </div>
+
+  <div id="form">
+    <input type="text" id="f-name" placeholder="Dein Name (optional)">
+    <select id="f-category">
+      <option value="help">🙋 Geholfen</option>
+      <option value="clean">🧹 Sauberkeit / Natur</option>
+      <option value="share">🎁 Gegeben / Geteilt</option>
+      <option value="kind">💚 Gekürzt / Freundlich</option>
+      <option value="other">✨ Sonstiges</option>
+    </select>
+    <input type="text" id="f-title" placeholder="Kurze Überschrift">
+    <textarea id="f-desc" placeholder="Was hast du getan? (Pflichtfeld)"></textarea>
+    <button class="submit-btn" id="btn-submit" disabled onclick="submitDeed()">Tat speichern & markieren</button>
+    <p style="font-size:12px; margin-top:8px; opacity:0.8">
+      Tipp: Nach dem Speichern klick auf die Karte, um den Ort zu setzen.
+    </p>
+  </div>
+
+  <div id="list-container"></div>
+</div>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ============ STATE & SPEICHERUNG ============
+const MUNSTER = [51.9627, 7.6267];
+let deeds = JSON.parse(localStorage.getItem('muenster_deeds') || '[]');
+let markers = [];
+let mode = 'list';
+let pendingDeed = null;   // bei "add"-Modus
+let userVotes = JSON.parse(localStorage.getItem('muenster_votes') || '{}');
+
+// Beispiel-Daten bei erstem Start
+if (deeds.length === 0) {
+  deeds = [
+    { id: 'demo1', name: 'Lisa', category: 'clean', title: 'Müll am Stadtwall eingesammelt',
+      desc: 'Habe beim Spaziergang eine Tüte Müll vom Stadtwall aufgesammelt.',
+      lat: 51.9533, lng: 7.6267, thumbs: 4, date: Date.now() },
+    { id: 'demo2', name: 'Jonas', category: 'kind', title: 'Einkäufe einer Seniorin getragen',
+      desc: 'Beim Einkaufen an der Wicked habe einer älteren Dame die Tüten zum Bus getragen.',
+      lat: 51.9547, lng: 7.6238, thumbs: 7, date: Date.now() }
+  ];
+  save();
+}
+
+function save() {
+  localStorage.setItem('muenster_deeds', JSON.stringify(deeds));
+}
+
+// ============ KARTE ============
+const map = L.map('map').setView(MUNSTER, 14);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© OpenStreetMap-Mitwirkende'
+}).addTo(map);
+
+function makeIcon(emoji) {
+  return L.divIcon({
+    html: `<div class="marker-icon"><span>${emoji}</span></div>`,
+    className: '', iconSize: [34, 34], iconAnchor: [17, 34], popupAnchor: [0, -34]
+  });
+}
+
+const CAT_EMOJI = { help: '🙋', clean: '🧹', share: '🎁', kind: '💚', other: '✨' };
+const CAT_NAME  = { help: 'Geholfen', clean: 'Sauberkeit', share: 'Geteilt', kind: 'Freundlich', other: 'Sonstiges' };
+
+function renderMarkers() {
+  markers.forEach(m => map.removeLayer(m));
+  markers = deeds.map(d =>
+    L.marker([d.lat, d.lng], { icon: makeIcon(CAT_EMOJI[d.category] || '✨') })
+      .addTo(map)
+      .bindPopup(`
+        <b>${d.title}</b><br>
+        ${d.desc}<br>
+        <i>von ${d.name || 'anonym'}</i> · 👍 ${d.thumbs}
+      `)
+  );
+}
+
+// ============ LISTE ============
+function renderList() {
+  const c = document.getElementById('list-container');
+  if (!deeds.length) {
+    c.innerHTML = '<p style="padding:10px; opacity:0.8">Noch keine Taten eingetragen. Sei die erste Person!</p>';
+    return;
+  }
+  const sorted = [...deeds].sort((a, b) => b.date - a.date);
+  c.innerHTML = sorted.map(d => `
+    <div class="deed-card">
+      <div class="title">
+        <span>${CAT_EMOJI[d.category]} ${d.title}</span>
+        <span class="cat">${CAT_NAME[d.category]}</span>
+      </div>
+      <div class="desc">${d.desc}</div>
+      <div class="footer">
+        <span>${d.name || 'anonym'} · ${new Date(d.date).toLocaleDateString('de-DE')}</span>
+        <button class="thumbs ${userVotes[d.id] ? 'voted' : ''}" onclick="vote('${d.id}')">
+          👍 ${d.thumbs}
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function vote(id) {
+  const d = deeds.find(x => x.id === id);
+  if (!d) return;
+  if (userVotes[id]) {
+    d.thumbs--; delete userVotes[id];
+  } else {
+    d.thumbs++; userVotes[id] = true;
+  }
+  localStorage.setItem('muenster_votes', JSON.stringify(userVotes));
+  save();
+  renderList();
+  renderMarkers();
+}
+
+// ============ TAT EINTRAGEN ============
+function switchMode(m) {
+  mode = m;
+  pendingDeed = null;
+  document.getElementById('btn-list').classList.toggle('active', m === 'list');
+  document.getElementById('btn-add').classList.toggle('active', m === 'add');
+  document.getElementById('form').classList.toggle('active', m === 'add');
+  document.getElementById('list-container').classList.toggle('active', m === 'list');
+  document.getElementById('btn-submit').disabled = true;
+}
+
+// Validierung für den Submit-Button
+document.getElementById('f-desc').addEventListener('input', e =>
+  document.getElementById('btn-submit').disabled = e.target.value.trim() === '');
+
+function submitDeed() {
+  pendingDeed = {
+    id: 'd' + Date.now(),
+    name: document.getElementById('f-name').value.trim(),
+    category: document.getElementById('f-category').value,
+    title: document.getElementById('f-title').value.trim() || 'Gute Tat',
+    desc: document.getElementById('f-desc').value.trim(),
+    thumbs: 0, date: Date.now()
+  };
+  document.getElementById('btn-submit').textContent = '📍 Jetzt auf der Karte klicken!';
+  document.getElementById('btn-submit').disabled = true;
+  map.getContainer().style.cursor = 'crosshair';
+}
+
+map.on('click', e => {
+  if (mode === 'add' && pendingDeed) {
+    pendingDeed.lat = e.latlng.lat;
+    pendingDeed.lng = e.latlng.lng;
+    deeds.push(pendingDeed);
+    save();
+    renderList();
+    renderMarkers();
+    map.flyTo(e.latlng, 15);
+    // Formular zurücksetzen
+    ['f-name','f-title','f-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('btn-submit').textContent = 'Tat speichern & markieren';
+    document.getElementById('btn-submit').disabled = true;
+    map.getContainer().style.cursor = '';
+    pendingDeed = null;
+    switchMode('list');
+  }
+});
+
+// ============ START ============
+renderList();
+renderMarkers();
+</script>
+</body>
+</html>
